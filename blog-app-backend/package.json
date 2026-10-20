@@ -5,10 +5,12 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node dist/server.js",
+    "start": "tsx ./src/server.ts",
     "dev": "tsx --watch ./src/server.ts",
     "typecheck": "tsc --noEmit",
-    "build": "tsc -p tsconfig.build.json"
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio"
   },
   "keywords": [],
   "type": "module",
@@ -26,6 +28,7 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.6.5",
+    "@types/pg": "^8.23.1",
     "drizzle-kit": "^1.0.0-rc.4",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"
