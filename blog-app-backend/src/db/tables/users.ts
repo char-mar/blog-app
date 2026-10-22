@@ -26,8 +26,8 @@ export const users = pgTable(
       .defaultNow()
       .$onUpdateFn(() => new Date().toISOString()),
   },
-  (t) => [uniqueIndex("users_email_unique").on(t.email)],
+  (table) => [uniqueIndex("users_email_unique").on(table.email)],
 );
 
-export type User = typeof users.$inferSelect;
-export type NewUser = typeof users.$inferInsert;
+export type Users = typeof users.$inferSelect;
+export type NewUsers = typeof users.$inferInsert;
