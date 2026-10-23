@@ -1,6 +1,7 @@
 import { app } from "./app";
+import { env } from "./config/env";
 
-const PORT = 8000;
+const PORT = env.PORT || 8000;
 
 app.listen(PORT, () => {
   console.log("Blog app is running on http://localhost:" + PORT);
