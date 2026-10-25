@@ -1,17 +1,17 @@
 type CardProps = {
   title?: string;
   imageUrl: string;
-  imageAlt: string;
+  content: string;
 };
 
-export default function Card({ title, imageUrl, imageAlt }: CardProps) {
+export default function Card({ title, imageUrl }: CardProps) {
   return (
     <article className="relative group w-full max-w-md overflow-hidden rounded-xl bg-white shadow-md transition-shadow duration-300 hover:shadow-xl">
       {/* Image container */}
       <div className="aspect-video overflow-hidden bg-gray-100">
         <img
           src={imageUrl}
-          alt={imageAlt}
+          alt={title}
           loading="lazy"
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         />

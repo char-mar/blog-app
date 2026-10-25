@@ -1,13 +1,16 @@
-import React from "react";
+// src/App.tsx
 
-import Navbar from "./componets/Navbar";
-import Hero from "./componets/Hero";
+import { Routes, Route } from "react-router-dom";
+
+import HomePage from "./pages/HomePage";
+import PostDetailsPage from "./pages/PostDetailsPage";
 
 export default function App() {
   return (
-    <div>
-      <Navbar />
-      <Hero />
-    </div>
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+
+      <Route path="/posts/:slug" element={<PostDetailsPage />} />
+    </Routes>
   );
 }
