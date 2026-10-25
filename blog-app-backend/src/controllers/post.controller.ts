@@ -40,6 +40,28 @@ export class PostController {
       }
     })();
   };
+  getBySlug = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const slug = req.params.slug;
+
+      // Check that slug is a single string before calling the service.
+      if (typeof slug !== "string") {
+        throw new Error("Invalid post slug");
+      }
+
+      const post = await postService.getPublishedPostBySlug(slug);
+
+      res
+        .status(200)
+        .json(successResponse(post, "Post retrieved successfully"));
+    } catch (error) {
+      next(error);
+    }
+  };
 
   getAll = (req: Request, res: Response, next: NextFunction): void => {
     void (async () => {

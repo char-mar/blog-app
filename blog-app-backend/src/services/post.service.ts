@@ -87,6 +87,20 @@ export class PostService {
     }
   }
 
+  async getPublishedPostBySlug(slug: string): Promise<Post> {
+    const [post] = await db
+      .select()
+      .from(posts)
+      .where(and(eq(posts.slug, slug), eq(posts.status, "published")))
+      .limit(1);
+
+    if (!post) {
+      throw new NotFoundError("Published post not found");
+    }
+
+    return post;
+  }
+
   async getPostById(id: string): Promise<Post> {
     try {
       const [post] = await db.select().from(posts).where(eq(posts.id, id));
