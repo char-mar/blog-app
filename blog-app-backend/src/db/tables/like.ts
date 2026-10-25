@@ -1,9 +1,4 @@
-import {
-  pgTable,
-  primaryKey,
-  timestamp,
-  uuid,
-} from "drizzle-orm/pg-core";
+import { pgTable, primaryKey, timestamp, uuid } from "drizzle-orm/pg-core";
 
 import { posts } from "./post";
 import { users } from "./users";

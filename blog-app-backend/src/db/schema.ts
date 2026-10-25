@@ -1,5 +1,6 @@
 export * from "./tables/users";
 export * from "./tables/profile";
+export * from "./tables/categories";
 export * from "./tables/post";
 export * from "./tables/comment";
 export * from "./tables/tags";

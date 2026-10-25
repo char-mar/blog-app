@@ -1,6 +1,5 @@
 import {
   pgTable,
-  text,
   timestamp,
   uniqueIndex,
   uuid,
@@ -10,20 +9,26 @@ import {
 export const categories = pgTable(
   "categories",
   {
-    id: uuid("id").primaryKey().notNull(),
-    name: varchar("name", { length: 100 }).notNull(),
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: varchar("name", { length: 100 }).notNull().unique(),
     slug: varchar("slug", { length: 120 }).notNull(),
-    description: text("description"),
-    createdAt: timestamp("created_at", { mode: "string", withTimezone: true })
+    description: varchar("description", { length: 500 }),
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+      mode: "date",
+    })
       .notNull()
       .defaultNow(),
-    updatedAt: timestamp("updated_at", { mode: "string", withTimezone: true })
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+      mode: "date",
+    })
       .notNull()
       .defaultNow()
-      .$onUpdateFn(() => new Date().toISOString()),
+      .$onUpdateFn(() => new Date()),
   },
-  (table) => [uniqueIndex("categories_slug_unique").on(table.slug)],
+  (table) => [
+    uniqueIndex("categories_name_unique").on(table.name),
+    uniqueIndex("categories_slug_unique").on(table.slug),
+  ],
 );
-
-export type Categories = typeof categories.$inferSelect;
-export type NewCategories = typeof categories.$inferInsert;

@@ -1,16 +1,18 @@
-import type { Request } from "express";
+import type { JwtPayload } from "./jwt";
 
-import type { AuthRequest } from "./express-request";
-
-export type { AuthRequest };
+export interface AuthRequest extends Request {
+  user?: JwtPayload;
+}
 
 declare global {
   namespace Express {
     interface Request {
-      user?: import("./jwt").JwtPayload;
+      user?: JwtPayload;
     }
   }
 }
 
 export {};
+
+
 

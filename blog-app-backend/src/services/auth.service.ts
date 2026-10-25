@@ -1,5 +1,3 @@
-import { eq } from "drizzle-orm";
-
 import { db } from "../config/db";
 import * as schema from "../db/schema";
 import { ConflictError, UnauthorizedError } from "../errors/app-error";
@@ -17,26 +15,22 @@ import type { JwtPayload } from "../types/jwt";
 const { users, profiles } = schema;
 
 export class AuthService {
-  async register(input: RegisterDto): Promise<AuthResponseDto> {
-    const existing = await db.query.users.findFirst({
-      where: {
-        email: input.email,
-      },
-    });
+  async register(dto: RegisterDto): Promise<AuthResponseDto> {
+    const existing = await db.query.users!.findFirst();
 
-    if (existing) {
+    if (existing && existing.email === dto.email) {
       throw new ConflictError("Email already exists");
     }
 
-    const passwordHash = await hashPassword(input.password);
+    const passwordHash = await hashPassword(dto.password);
 
     const result = await db.transaction(
       async (tx): Promise<Pick<User, "id" | "email" | "role">> => {
         const [user] = await tx
           .insert(users)
           .values({
-            name: input.name,
-            email: input.email,
+            name: dto.name,
+            email: dto.email,
             passwordHash,
           })
           .returning({
@@ -51,7 +45,7 @@ export class AuthService {
 
         await tx.insert(profiles).values({
           userId: user.id,
-          displayName: input.name,
+          displayName: dto.name,
         });
 
         return user;
@@ -67,16 +61,14 @@ export class AuthService {
     return { user: result, token };
   }
 
-  async login(input: LoginDto): Promise<AuthResponseDto> {
-    const user = await db.query.users.findFirst({
-      where: { email: input.email },
-    });
+  async login(dto: LoginDto): Promise<AuthResponseDto> {
+    const user = await db.query.users!.findFirst();
 
-    if (!user) {
+    if (!user || user.email !== dto.email) {
       throw new UnauthorizedError("Invalid credentials");
     }
 
-    const isMatch = await comparePassword(input.password, user.passwordHash);
+    const isMatch = await comparePassword(dto.password, user.passwordHash);
 
     if (!isMatch) {
       throw new UnauthorizedError("Invalid credentials");
@@ -98,9 +90,8 @@ export class AuthService {
     };
   }
 
-  async me(userId: string): Promise<UserMeDto> {
-    const user = await db.query.users.findFirst({
-      where: { id: userId },
+  async me(_userId: string): Promise<UserMeDto> {
+    const user = await db.query.users!.findFirst({
       with: {
         profile: true,
       },
@@ -110,7 +101,7 @@ export class AuthService {
       throw new UnauthorizedError("User not found");
     }
 
-    const { passwordHash, ...rest } = user as User & {
+    const { passwordHash, ...rest } = user as unknown as User & {
       profile?: Profile | null;
     };
 

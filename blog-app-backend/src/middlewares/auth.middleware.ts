@@ -9,7 +9,7 @@ export const requireAuth = (
   _res: Response,
   next: NextFunction,
 ) => {
-  const header = req.headers.authorization;
+  const header = (req.headers as { authorization?: string }).authorization;
 
   if (!header || !header.startsWith("Bearer ")) {
     throw new UnauthorizedError("Missing or invalid token");

@@ -12,8 +12,3 @@ export const successResponse = <T>(
   ...(message && { message }),
   data,
 });
-
-export const errorResponse = (message: string): ApiResponse<never> => ({
-  success: false,
-  message,
-});

@@ -14,8 +14,15 @@ export const validate =
       }) as { body?: unknown; query?: unknown; params?: unknown };
 
       if (parsed.body !== undefined) req.body = parsed.body;
-      if (parsed.query !== undefined)
-        req.query = parsed.query as typeof req.query;
+      if (parsed.query !== undefined) {
+        // Express 5 defines req.query as a getter, so it cannot be assigned directly.
+        Object.defineProperty(req, "query", {
+          value: parsed.query,
+          writable: true,
+          configurable: true,
+          enumerable: true,
+        });
+      }
       if (parsed.params !== undefined)
         req.params = parsed.params as typeof req.params;
 
