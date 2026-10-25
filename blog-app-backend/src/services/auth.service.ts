@@ -1,3 +1,5 @@
+import { eq } from "drizzle-orm";
+
 import { db } from "../config/db";
 import * as schema from "../db/schema";
 import { ConflictError, UnauthorizedError } from "../errors/app-error";
@@ -9,16 +11,20 @@ import type {
   AuthResponseDto,
   UserMeDto,
 } from "../dto/auth.dto";
-import type { User, Profile } from "../types/models";
+import type { User } from "../types/models";
 import type { JwtPayload } from "../types/jwt";
 
 const { users, profiles } = schema;
 
 export class AuthService {
   async register(dto: RegisterDto): Promise<AuthResponseDto> {
-    const existing = await db.query.users!.findFirst();
+    const [existing] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, dto.email))
+      .limit(1);
 
-    if (existing && existing.email === dto.email) {
+    if (existing) {
       throw new ConflictError("Email already exists");
     }
 
@@ -62,9 +68,13 @@ export class AuthService {
   }
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
-    const user = await db.query.users!.findFirst();
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, dto.email))
+      .limit(1);
 
-    if (!user || user.email !== dto.email) {
+    if (!user) {
       throw new UnauthorizedError("Invalid credentials");
     }
 
@@ -90,22 +100,29 @@ export class AuthService {
     };
   }
 
-  async me(_userId: string): Promise<UserMeDto> {
-    const user = await db.query.users!.findFirst({
-      with: {
-        profile: true,
-      },
-    });
+  async me(userId: string): Promise<UserMeDto> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
 
     if (!user) {
       throw new UnauthorizedError("User not found");
     }
 
-    const { passwordHash, ...rest } = user as unknown as User & {
-      profile?: Profile | null;
-    };
+    const [profile] = await db
+      .select()
+      .from(profiles)
+      .where(eq(profiles.userId, userId))
+      .limit(1);
 
-    return rest as UserMeDto;
+    const { passwordHash, ...rest } = user;
+
+    return {
+      ...rest,
+      profile: profile ?? null,
+    };
   }
 }
 

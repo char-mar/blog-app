@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+export { paginationSchema } from "./pagination.schema";
+export type { PaginationQuery } from "./pagination.schema";
+
 export const createPostSchema = z.object({
   body: z.object({
     title: z.string().min(3).max(100),
@@ -31,14 +34,6 @@ export const postIdSchema = z.object({
   }),
 });
 
-export const paginationSchema = z.object({
-  query: z.object({
-    page: z.coerce.number().int().positive().default(1),
-    limit: z.coerce.number().int().positive().max(100).default(10),
-  }),
-});
-
 export type CreatePostBody = z.infer<typeof createPostSchema>["body"];
 export type UpdatePostBody = z.infer<typeof updatePostSchema>["body"];
 export type PostIdParams = z.infer<typeof postIdSchema>["params"];
-export type PaginationQuery = z.infer<typeof paginationSchema>["query"];
