@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
+
 import { getPostBySlug } from "../services/postService";
+import Comments from "../componets/Comments";
 
 const API_ORIGIN = "http://localhost:8000";
 
@@ -39,6 +41,7 @@ export default function PostDetailsPage() {
         </p>
 
         <button
+          type="button"
           onClick={() => refetch()}
           className="mr-4 rounded bg-blue-600 px-4 py-2 text-white"
         >
@@ -103,6 +106,9 @@ export default function PostDetailsPage() {
       <article className="whitespace-pre-wrap text-lg leading-8 text-gray-700">
         {post.content}
       </article>
+
+      {/* Comments and replies for this article */}
+      <Comments postId={post.id} />
     </main>
   );
 }
