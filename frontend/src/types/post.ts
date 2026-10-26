@@ -1,13 +1,21 @@
+export interface PostAuthor {
+  id: string;
+  name: string;
+}
+
+export type PostStatus = "draft" | "published";
+
 export interface Post {
   id: string;
+  authorId: string;
+  author?: PostAuthor | null;
+  categoryId: string;
   title: string;
   content: string;
   slug: string;
-  imageUrl?: string | null;
-  status?: "draft" | "published";
-  publishedAt?: string | null;
-  author?: {
-    id?: string;
-    name?: string;
-  } | null;
+  status: PostStatus;
+  imageUrl: string | null;
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
