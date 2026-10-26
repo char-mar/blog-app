@@ -1,45 +1,56 @@
-import type { NextFunction, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 
-import { UnauthorizedError } from "../errors/app-error";
+import { ForbiddenError, UnauthorizedError } from "../errors/app-error";
 import { verifyToken } from "../utils/jwt";
-import type { AuthRequest } from "../types/express";
 
 export const requireAuth = (
-  req: AuthRequest,
+  req: Request,
   _res: Response,
   next: NextFunction,
-) => {
-  const header = (req.headers as { authorization?: string }).authorization;
+): void => {
+  // 1. Read the HTTP-only session cookie.
+  const cookieValue: unknown = req.cookies?.session;
 
-  if (!header || !header.startsWith("Bearer ")) {
-    throw new UnauthorizedError("Missing or invalid token");
-  }
+  const cookieToken = typeof cookieValue === "string" ? cookieValue : undefined;
 
-  const token = header.split(" ")[1];
+  // 2. Support Bearer tokens for API clients.
+  const header = req.get("authorization");
+
+  const bearerToken = header?.startsWith("Bearer ")
+    ? header.slice(7)
+    : undefined;
+
+  // 3. Prefer the cookie; fall back to the Bearer token.
+  const token = cookieToken || bearerToken;
 
   if (!token) {
-    throw new UnauthorizedError("Missing or invalid token");
+    next(new UnauthorizedError("Authentication required"));
+    return;
   }
 
+  // 4. Verify the token and attach the user to the request.
   try {
-    const payload = verifyToken(token);
-    req.user = payload;
+    req.user = verifyToken(token);
     next();
   } catch {
-    throw new UnauthorizedError("Invalid or expired token");
+    next(new UnauthorizedError("Invalid or expired token"));
   }
 };
 
 export const requireRole = (...roles: Array<"user" | "admin">) => {
-  return (req: AuthRequest, _res: Response, next: NextFunction) => {
+  return (req: Request, _res: Response, next: NextFunction): void => {
+    // Authentication must happen before role authorization.
     if (!req.user) {
-      throw new UnauthorizedError("Unauthorized");
+      next(new UnauthorizedError("Authentication required"));
+      return;
     }
+
+    // The user is authenticated but lacks the required role.
     if (!roles.includes(req.user.role)) {
-      throw new UnauthorizedError("Forbidden");
+      next(new ForbiddenError("Insufficient permissions"));
+      return;
     }
+
     next();
   };
 };
-
-

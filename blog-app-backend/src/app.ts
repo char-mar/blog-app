@@ -1,6 +1,7 @@
 import express from "express";
 import path from "node:path";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 import routes from "./routes";
 import { errorHandler } from "./middlewares/error-handler";
@@ -11,7 +12,15 @@ export const app = express();
 app.use(express.json());
 
 // Allow requests from your frontend.
-app.use(cors());
+app.use(express.json());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL ?? "http://localhost:5173",
+    credentials: true,
+  }),
+);
+
+app.use(cookieParser());
 
 // Serve uploaded images and other files from the uploads directory.
 const uploadsDirectory = path.resolve(process.cwd(), "uploads");
